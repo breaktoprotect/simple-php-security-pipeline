@@ -24,17 +24,19 @@ jobs:
     name: Trivy SCA Scan
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         
       - name: Trivy SCA Scan
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
-          ignore-unfixed: true
           format: 'sarif'
           output: ${{ inputs.trivy_report_path }}
-          severity: 'CRITICAL'
         id: trivy
+        
+      - name: debug
+        run: |
+          ls -alh
         
       - name: Upload Trivy Report
         uses: github/codeql-action/upload-sarif@v2
@@ -46,15 +48,15 @@ jobs:
     name: PHPStan SAST Scan
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         
       - name: PHPStan SAST Scan
-        uses: ondrejmirtes/phpstan-ga-action@v2.0
+        uses: php-actions/phpstan@v3
         with:
           level: 5
           
       - name: Upload PHPStan Report
-        uses: github/codeql-action/upload-sarif@v1
+        uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: ${{ env.PHPSTAN_REPORT_PATH }}
 
@@ -63,7 +65,7 @@ jobs:
     name: PHP CodeSniffer Quality Check
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         
       - name: PHP CodeSniffer Quality Check
         uses: drupalcodequality/phpcodesniffer-ga-action@v3.3.1
