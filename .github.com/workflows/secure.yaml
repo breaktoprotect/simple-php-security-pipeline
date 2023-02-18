@@ -1,9 +1,5 @@
 name: Secure CI/CD Pipeline
 
-permissions:
-  contents: none
-  pull-requests: write
-
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
