@@ -83,7 +83,7 @@ jobs:
           path: ${{ env.PSALM_REPORT_PATH }}
           retention-days: 30
           
-  secrets_scanning:
+  trufflehog_scanning:
     runs-on: ubuntu-latest
     name: TruffleHog Secrets Scanning
     steps:
@@ -91,7 +91,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: trufflehog-actions-scan
-      uses: eddiewebb/trufflehog-action@v1
+      uses: edplato/trufflehog-actions-scan@master
       with:
           scanArguments: "--max_depth=5"          
         
