@@ -9,12 +9,12 @@ on:
       trivy_report_path:
         type: string
         description: 'Path to Trivy report file'
-        required: true
+        required: false
         default: 'trivy-report.sarif'
       phpstan_report_path:
         type: string
         description: 'Path to PHPStan report file'
-        required: true
+        required: false
         default: 'phpstan-report.sarif'
   workflow_dispatch:
 
