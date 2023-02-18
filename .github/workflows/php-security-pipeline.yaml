@@ -29,16 +29,17 @@ jobs:
       - name: Trivy SCA Scan
         uses: aquasecurity/trivy-action@master
         with:
-          format: "json"
-          exit-code: "0,1,2"
-          vuln-type: "os,library,application"
-          ignore-unfixed: "true"
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'sarif'
+          output: ${{ inputs.trivy_report_path }}
+          severity: 'CRITICAL'
         id: trivy
         
       - name: Upload Trivy Report
-        uses: github/codeql-action/upload-sarif@v1
+        uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: ${{ env.TRIVY_REPORT_PATH }}
+          sarif_file: ${{ inputs.trivy_report_path }}
 
   phpstan_scan:
     runs-on: ubuntu-latest
