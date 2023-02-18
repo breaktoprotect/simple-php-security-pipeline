@@ -1,11 +1,23 @@
 name: Secure CI/CD Pipeline
 
-on:
-  push:
-    branches: [main]
+permissions:
+  contents: none
+  pull-requests: write
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+on:
+  workflow_call:
+    inputs:
+      trivy_report_path:
+        description: 'Path to Trivy report file'
+        required: true
+        default: 'trivy-report.sarif'
+      phpstan_report_path:
+        description: 'Path to PHPStan report file'
+        required: true
+        default: 'phpstan-report.sarif'
 
 jobs:
   trivy_scan:
@@ -26,6 +38,7 @@ jobs:
         uses: github/codeql-action/upload-sarif@v1
         with:
           sarif_file: ${{ env.TRIVY_REPORT_PATH }}
+
   phpstan_scan:
     runs-on: ubuntu-latest
     name: PHPStan SAST Scan
@@ -33,13 +46,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: PHPStan SAST Scan
-        uses: "ondrejmirtes/phpstan-ga-action@v2.0"
+        uses: ondrejmirtes/phpstan-ga-action@v2.0
         with:
           level: 5
       - name: Upload PHPStan Report
         uses: github/codeql-action/upload-sarif@v1
         with:
           sarif_file: ${{ env.PHPSTAN_REPORT_PATH }}
+
   upload_reports:
     runs-on: ubuntu-latest
     name: Upload Reports
@@ -55,3 +69,8 @@ jobs:
         with:
           sarif_file: "./combined.sarif"
           
+# Set the default values for environment variables
+defaults:
+  env:
+    TRIVY_REPORT_PATH: ${{ github.workspace }}/${{ inputs.trivy_report_path }}
+    PHPSTAN_REPORT_PATH: ${{ github.workspace }}/${{ inputs.phpstan_report_path }}
