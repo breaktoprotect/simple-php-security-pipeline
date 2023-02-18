@@ -91,21 +91,9 @@ jobs:
       uses: actions/checkout@v3
 
     - name: trufflehog-actions-scan
-      uses: edplato/trufflehog-actions-scan@master
+      uses: eddiewebb/trufflehog-action@v1
       with:
-          path: '.'
-          results-file: ${{ env.TRUFFLEHOG_REPORT_PATH }}
-          
-    - name: Upload scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v1
-      with:
-        sarif_file: ${{ env.TRUFFLEHOG_REPORT_PATH }}
-
-    - name: Upload scan results as artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: TruffleHog Secrets Leak Report
-        path: ${{ env.TRUFFLEHOG_REPORT_PATH }}
+          scanArguments: "--max_depth=5"          
         
   phpcs_scan:
     runs-on: ubuntu-latest
