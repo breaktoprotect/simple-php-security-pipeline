@@ -18,6 +18,7 @@ on:
         description: 'Path to PHPStan report file'
         required: true
         default: 'phpstan-report.sarif'
+  workflow_dispatch:
 
 jobs:
   trivy_scan:
@@ -54,23 +55,29 @@ jobs:
         with:
           sarif_file: ${{ env.PHPSTAN_REPORT_PATH }}
 
+  phpcs_scan:
+    runs-on: ubuntu-latest
+    name: PHP CodeSniffer Quality Check
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: PHP CodeSniffer Quality Check
+        uses: drupalcodequality/phpcodesniffer-ga-action@v3.3.1
+        with:
+          standard: PSR12
+      - name: Upload PHP CodeSniffer Report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ env.PHPCS_REPORT_PATH }}
+
   upload_reports:
     runs-on: ubuntu-latest
     name: Upload Reports
-    needs: [trivy_scan, phpstan_scan]
+    needs: [trivy_scan, phpstan_scan, phpcs_scan]
     steps:
       - name: Combine Reports
         run: |
           trivy_report_path=$GITHUB_WORKSPACE/${{ env.TRIVY_REPORT_PATH }}
           phpstan_report_path=$GITHUB_WORKSPACE/${{ env.PHPSTAN_REPORT_PATH }}
-          echo "{\"$schema\": \"https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json\", \"version\": \"2.1.0\", \"runs\": [$(cat $trivy_report_path),$'\n',$(cat $phpstan_report_path)]}" > combined.sarif
-      - name: Upload to Github Security Tab
-        uses: github/codeql-action/upload-sarif@v1
-        with:
-          sarif_file: "./combined.sarif"
-          
-# Set the default values for environment variables
-defaults:
-  env:
-    TRIVY_REPORT_PATH: ${{ github.workspace }}/${{ inputs.trivy_report_path }}
-    PHPSTAN_REPORT_PATH: ${{ github.workspace }}/${{ inputs.phpstan_report_path }}
+          phpcs_report_path=$GITHUB_WORKSPACE/${{ env.PHPCS_REPORT_PATH }}
+          echo "{\"$schema\": \"https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json\", \"version\": \"2.1.0\", \"runs\": [$(cat $trivy_report_path),$'\n',$(cat $phpstan_report_path),$'\n',$(cat $phpcs_report_path)]}" > combined.s
