@@ -4,6 +4,7 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   TRIVY_REPORT_PATH: 'trivy-report.sarif'
   PSALM_REPORT_PATH: 'psalm-report.sarif'
+  CODEQL_REPORT_PATH: 'codeql-report.sarif'
 
 on:
   workflow_call:
@@ -82,6 +83,20 @@ jobs:
           path: ${{ env.PSALM_REPORT_PATH }}
           retention-days: 30
           
+  codeql_scan:
+      runs-on: ubuntu-latest
+      name: CodeQL SAST Scan
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v3
+  
+        - name: Set up CodeQL
+          uses: github/codeql-action/init@v2
+          with:
+            languages: php
+
+        - name: Perform CodeQL Analysis
+          uses: github/codeql-action/analyze@v2
           
   phpcs_scan:
     runs-on: ubuntu-latest
