@@ -93,7 +93,7 @@ jobs:
     - name: trufflehog-actions-scan
       uses: edplato/trufflehog-actions-scan@master
       with:
-          scanArguments: "--max_depth=50 --entropy=False"          
+          scanArguments: "--regex --max_depth=15"          
         
   phpcs_scan:
     runs-on: ubuntu-latest
