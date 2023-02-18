@@ -34,7 +34,7 @@ jobs:
         with:
           scan-type: 'fs'
           format: 'sarif'
-          output: $TRIVY_REPORT_PATH
+          output: ${{ env.TRIVY_REPORT_PATH }}
         id: trivy
         
       - name: debug
@@ -55,13 +55,13 @@ jobs:
     name: Psalm PHP SAST Scan
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Psalm Security Scan
         uses: docker://ghcr.io/psalm/psalm-security-scan
         with:
           security_analysis: true
-          report_file: PSALM_REPORT_PATH
+          report_file: ${{ env.PSALM_REPORT_PATH }}
         
       - name: Upload Security Analysis results to GitHub
         uses: github/codeql-action/upload-sarif@v2
@@ -75,13 +75,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         
-      - name: PHP CodeSniffer Quality Check
-        uses: drupalcodequality/phpcodesniffer-ga-action@v3.3.1
-        with:
-          standard: PSR12
+      - name: php-codesniffer
+        uses: pipeline-components/php-codesniffer@v0.12.3
           
-      - name: Upload PHP CodeSniffer Report
-        uses: github/codeql-action/upload-sarif@v1
-        with:
-          sarif_file: ${{ env.PHPCS_REPORT_PATH }}
+     #- name: Upload PHP CodeSniffer Report
+     #  uses: github/codeql-action/upload-sarif@v1
+     #  with:
+     #    sarif_file: ${{ env.PHPCS_REPORT_PATH }}
 
