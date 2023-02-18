@@ -87,15 +87,15 @@ jobs:
     runs-on: ubuntu-latest
     name: TruffleHog Secrets Scanning
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-        ref: ${{ github.head_ref }} // necessary for pull request workflow trigger
+    - name: Checkout code
+      uses: actions/checkout@v3
+
     - name: trufflehog-actions-scan
       uses: edplato/trufflehog-actions-scan@master
       with:
           path: '.'
           results-file: ${{ env.TRUFFLEHOG_REPORT_PATH }}
+          
     - name: Upload scan results to GitHub Security tab
       uses: github/codeql-action/upload-sarif@v1
       with:
