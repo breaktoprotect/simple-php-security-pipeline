@@ -57,7 +57,7 @@ jobs:
       - name: PHPStan SAST Scan
         uses: php-actions/phpstan@v3
         with:
-          path: '*.*'
+          path: './'
           level: 5
           
       - name: Upload PHPStan Report
