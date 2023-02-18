@@ -4,6 +4,7 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   TRIVY_REPORT_PATH: 'trivy-report.sarif'
   PSALM_REPORT_PATH: 'psalm-report.sarif'
+  TRUFFLEHOG_REPORT_PATH: 'trufflehog-report.sarif'
 
 on:
   workflow_call:
@@ -82,6 +83,30 @@ jobs:
           path: ${{ env.PSALM_REPORT_PATH }}
           retention-days: 30
           
+  secrets_scanning:
+    runs-on: ubuntu-latest
+    name: TruffleHog Secrets Scanning
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        ref: ${{ github.head_ref }} // necessary for pull request workflow trigger
+    - name: trufflehog-actions-scan
+      uses: edplato/trufflehog-actions-scan@master
+      with:
+          path: '.'
+          results-file: ${{ env.TRUFFLEHOG_REPORT_PATH }}
+    - name: Upload scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: ${{ env.TRUFFLEHOG_REPORT_PATH }}
+
+    - name: Upload scan results as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: TruffleHog Secrets Leak Report
+        path: ${{ env.TRUFFLEHOG_REPORT_PATH }}
+        
   phpcs_scan:
     runs-on: ubuntu-latest
     name: PHP CodeSniffer (Code Quality - Not security)
