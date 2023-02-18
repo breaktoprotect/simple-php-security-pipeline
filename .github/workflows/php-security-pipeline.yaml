@@ -70,7 +70,7 @@ jobs:
           
   phpcs_scan:
     runs-on: ubuntu-latest
-    name: PHP CodeSniffer Quality Check
+    name: PHP CodeSniffer (Code Quality - Not security)
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -81,14 +81,3 @@ jobs:
           standard: PSR2
         id: phpcs
         continue-on-error: true
-        
-      - name: Upload to Security tab
-        uses: github/codeql-action/upload-sarif@v1
-        with:
-          sarif_file: ${{ steps.phpcs.outputs.report }}
-          
-     #- name: Upload PHP CodeSniffer Report
-     #  uses: github/codeql-action/upload-sarif@v1
-     #  with:
-     #    sarif_file: ${{ env.PHPCS_REPORT_PATH }}
-
