@@ -2,6 +2,8 @@ name: Secure CI/CD Pipeline
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  TRIVY_REPORT_PATH: 'trivy-report.sarif'
+  PSALM_REPORT_PATH: 'psalm-report.sarif'
 
 on:
   workflow_call:
@@ -11,11 +13,6 @@ on:
         description: 'Path to Trivy report file'
         required: false
         default: 'trivy-report.sarif'
-      phpstan_report_path:
-        type: string
-        description: 'Path to PHPStan report file'
-        required: false
-        default: 'phpstan-report.sarif'
       psalm_report_path:
         type: string
         description: 'Path to Psalm report file'
@@ -37,7 +34,7 @@ jobs:
         with:
           scan-type: 'fs'
           format: 'sarif'
-          output: ${{ inputs.trivy_report_path }}
+          output: $TRIVY_REPORT_PATH
         id: trivy
         
       - name: debug
@@ -45,36 +42,13 @@ jobs:
           ls -alh
       - name: Change permission of report to runner:docker
         run: | 
-          sudo chown runner:docker ${{ inputs.trivy_report_path }}
-          ls -alh ${{ inputs.trivy_report_path }}
+          sudo chown runner:docker $TRIVY_REPORT_PATH
+          ls -alh $TRIVY_REPORT_PATH
         
       - name: Upload Trivy Report
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: ${{ inputs.trivy_report_path }}
-
-  phpstan_scan:
-    runs-on: ubuntu-latest
-    name: PHPStan SAST Scan
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        
-      - name: PHPStan SAST Scan
-        uses: php-actions/phpstan@v3
-        with:
-          path: './'
-          level: 5
-          
-      - name: Change permission of report to runner:docker
-        run: | 
-          sudo chown runner:docker ${{ inputs.phpstan-report.sarif }}
-          ls -alh ${{ inputs.trivy_report_path }}
-          
-      - name: Upload PHPStan Report
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: ${{ env.PHPSTAN_REPORT_PATH }}
+          sarif_file: ${{ env.TRIVY_REPORT_PATH }}
           
   psalm_scan:
     runs-on: ubuntu-latest
@@ -85,11 +59,14 @@ jobs:
 
       - name: Psalm Security Scan
         uses: docker://ghcr.io/psalm/psalm-security-scan
+        with:
+          security_analysis: true
+          report_file: PSALM_REPORT_PATH
         
       - name: Upload Security Analysis results to GitHub
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: ${{ inputs.psalm_report_path }}
+          sarif_file: ${{ env.PSALM_REPORT_PATH }}
           
   phpcs_scan:
     runs-on: ubuntu-latest
@@ -108,14 +85,3 @@ jobs:
         with:
           sarif_file: ${{ env.PHPCS_REPORT_PATH }}
 
-  upload_reports:
-    runs-on: ubuntu-latest
-    name: Upload Reports
-    needs: [trivy_scan, phpstan_scan, phpcs_scan]
-    steps:
-      - name: Combine Reports
-        run: |
-          trivy_report_path=$GITHUB_WORKSPACE/${{ env.TRIVY_REPORT_PATH }}
-          phpstan_report_path=$GITHUB_WORKSPACE/${{ env.PHPSTAN_REPORT_PATH }}
-          phpcs_report_path=$GITHUB_WORKSPACE/${{ env.PHPCS_REPORT_PATH }}
-          echo "{\"$schema\": \"https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json\", \"version\": \"2.1.0\", \"runs\": [$(cat $trivy_report_path),$'\n',$(cat $phpstan_report_path),$'\n',$(cat $phpcs_report_path)]}" > combined.s
