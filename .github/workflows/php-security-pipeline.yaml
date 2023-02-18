@@ -50,6 +50,13 @@ jobs:
         with:
           sarif_file: ${{ env.TRIVY_REPORT_PATH }}
           
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Trivy SCA Report
+          path: ${{ env.TRIVY_REPORT_PATH }}
+          retention-days: 30
+          
   psalm_scan:
     runs-on: ubuntu-latest
     name: Psalm PHP SAST Scan
@@ -67,6 +74,14 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: ${{ env.PSALM_REPORT_PATH }}
+          
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Psalm SAST Report
+          path: ${{ env.PSALM_REPORT_PATH }}
+          retention-days: 30
+          
           
   phpcs_scan:
     runs-on: ubuntu-latest
