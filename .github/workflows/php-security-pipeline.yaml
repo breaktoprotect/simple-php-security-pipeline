@@ -25,14 +25,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        
       - name: Trivy SCA Scan
-        uses: aquasecurity/trivy-action@v0.6.0
+        uses: aquasecurity/trivy-action@master
         with:
           format: "json"
           exit-code: "0,1,2"
           vuln-type: "os,library,application"
           ignore-unfixed: "true"
         id: trivy
+        
       - name: Upload Trivy Report
         uses: github/codeql-action/upload-sarif@v1
         with:
@@ -44,10 +46,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        
       - name: PHPStan SAST Scan
         uses: ondrejmirtes/phpstan-ga-action@v2.0
         with:
           level: 5
+          
       - name: Upload PHPStan Report
         uses: github/codeql-action/upload-sarif@v1
         with:
@@ -59,10 +63,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        
       - name: PHP CodeSniffer Quality Check
         uses: drupalcodequality/phpcodesniffer-ga-action@v3.3.1
         with:
           standard: PSR12
+          
       - name: Upload PHP CodeSniffer Report
         uses: github/codeql-action/upload-sarif@v1
         with:
