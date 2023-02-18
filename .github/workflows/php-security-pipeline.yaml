@@ -77,6 +77,14 @@ jobs:
         
       - name: php-codesniffer
         uses: pipeline-components/php-codesniffer@v0.12.3
+        with:
+          standard: PSR2
+        id: phpcs
+        
+      - name: Upload to Security tab
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.phpcs.outputs.report }}
           
      #- name: Upload PHP CodeSniffer Report
      #  uses: github/codeql-action/upload-sarif@v1
