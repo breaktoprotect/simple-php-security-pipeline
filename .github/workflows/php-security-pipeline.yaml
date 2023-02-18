@@ -37,6 +37,10 @@ jobs:
       - name: debug
         run: |
           ls -alh
+      - name: Change permission of report to runner:docker
+        run: | 
+          chown runner:docker ${{ inputs.trivy_report_path }}
+          ls -alh ${{ inputs.trivy_report_path }}
         
       - name: Upload Trivy Report
         uses: github/codeql-action/upload-sarif@v2
@@ -53,6 +57,7 @@ jobs:
       - name: PHPStan SAST Scan
         uses: php-actions/phpstan@v3
         with:
+          path: '*.*'
           level: 5
           
       - name: Upload PHPStan Report
