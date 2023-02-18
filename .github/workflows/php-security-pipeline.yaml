@@ -39,7 +39,7 @@ jobs:
           ls -alh
       - name: Change permission of report to runner:docker
         run: | 
-          chown runner:docker ${{ inputs.trivy_report_path }}
+          sudo chown runner:docker ${{ inputs.trivy_report_path }}
           ls -alh ${{ inputs.trivy_report_path }}
         
       - name: Upload Trivy Report
